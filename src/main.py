@@ -4,6 +4,7 @@ import csv
 import string
 import secrets
 import psycopg2
+from psycopg2 import Error
 from dotenv import load_dotenv
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
@@ -13,19 +14,6 @@ load_dotenv(dotenv_path=".env")
 GROUPS = int(os.getenv("GROUPS"))
 TEAMS = int(os.getenv("TEAMS"))
 OUTPUT_FILE = os.getenv("OUTPUT_FILE")
-
-## create db connection
-db = psycopg2.connect(
-    database=os.getenv("POSTGRES_DB"),
-    user=os.getenv("POSTGRES_USER"),
-    password=os.getenv("POSTGRES_PASSWORD"),
-    host=os.getenv("DATABASE_HOST"),
-    port=os.getenv("DATABASE_PORT"),
-)
-db.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-
-# init db cursor
-cursor = db.cursor()
 
 
 def generate_pwd(length: int):
@@ -43,7 +31,7 @@ def save_to_file(data: list[dict], filepath: str):
         dict_writer.writerows(data)
 
 
-def create_db_and_user(group: int, team: int):
+def create_db_and_user(group: int, team: int, cursor):
     dbname = f"db{group}eq{team}"
     usrrole = f"role{group}eq{team}"
     usrname = f"user{group}eq{team}"
@@ -66,14 +54,38 @@ def create_db_and_user(group: int, team: int):
 
 
 if __name__ == "__main__":
-    # remove connect privileges from existing databases
-    for db in ["demo", "postgres"]:
-        cursor.execute(f"REVOKE CONNECT ON DATABASE {db} FROM PUBLIC")
+    try:
+        ## create db connection
+        db = psycopg2.connect(
+            database=os.getenv("POSTGRES_DB"),
+            user=os.getenv("POSTGRES_USER"),
+            password=os.getenv("POSTGRES_PASSWORD"),
+            host=os.getenv("DATABASE_HOST"),
+            port=os.getenv("DATABASE_PORT"),
+        )
+        db.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 
-    # create user accounts and associated databases
-    credentials = []
-    for i in range(1, GROUPS + 1):
-        for j in range(1, TEAMS + 1):
-            credentials.append(create_db_and_user(i, j))
+        # init db cursor
+        cursor = db.cursor()
 
-    save_to_file(credentials, OUTPUT_FILE)
+        # remove connect privileges from existing databases
+        for dbname in ["demo", "postgres"]:
+            cursor.execute(f"REVOKE CONNECT ON DATABASE {dbname} FROM PUBLIC")
+
+        # create user accounts and associated databases
+        credentials = []
+        for i in range(1, GROUPS + 1):
+            for j in range(1, TEAMS + 1):
+                credentials.append(create_db_and_user(i, j, cursor))
+
+        db.commit()
+        save_to_file(credentials, OUTPUT_FILE)
+        print("Credentials created successfully in PostgreSQL")
+
+    except (Exception, Error) as error:
+        print("Error while connecting to PostgreSQL", error)
+    finally:
+        if db:
+            cursor.close()
+            db.close()
+            print("PostgreSQL connection is closed")
