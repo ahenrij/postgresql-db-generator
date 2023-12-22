@@ -8,7 +8,7 @@ load_dotenv()
 GROUPS = os.getenv('GROUPS')
 TEAMS = os.getenv('TEAMS')
 
-con = psycopg2.connect(
+db = psycopg2.connect(
     database=os.getenv('POSTGRES_DB'),
     user=os.getenv('POSTGRES_USER'),
     password=os.getenv('POSTGRES_PASSWORD'),
@@ -16,16 +16,16 @@ con = psycopg2.connect(
     port=os.getenv('DATABASE_PORT'),
 )
 
-cursor_obj = con.cursor()
+cursor = db.cursor()
 
 
 def create_db_and_user(group: int, team: int):
-    cursor_obj.execute("CREATE DATABASE :dbname")
-    cursor_obj.execute("CREATE ROLE :new_role")
-    cursor_obj.execute("GRANT CONNECT ON DATABASE :dbname TO :new_role")
-    cursor_obj.execute("CREATE USER :username WITH PASSWORD '${userpwd}'")
-    cursor_obj.execute("CREATE DATABASE :dbname")
-    cursor_obj.execute("GRANT :new_role TO :username")
+    cursor.execute("CREATE DATABASE :dbname")
+    cursor.execute("CREATE ROLE :new_role")
+    cursor.execute("GRANT CONNECT ON DATABASE :dbname TO :new_role")
+    cursor.execute("CREATE USER :username WITH PASSWORD '${userpwd}'")
+    cursor.execute("CREATE DATABASE :dbname")
+    cursor.execute("GRANT :new_role TO :username")
 
 
 if __name__ == "__main__":
