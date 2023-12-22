@@ -4,7 +4,7 @@ Generate multiple PostgreSQL databases and users with restricted privileges
 
 ## Requirements
 
-- Python > 3.10
+- Python >= 3.10
 - [Poetry](https://python-poetry.org/)
 
 ## Usage
