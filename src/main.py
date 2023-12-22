@@ -32,10 +32,10 @@ def save_to_file(data: list[dict], filepath: str):
 
 
 def create_db_and_user(group: int, team: int, cursor):
-    dbname = f"db{group}eq{team}"
-    usrrole = f"role{group}eq{team}"
-    usrname = f"user{group}eq{team}"
-    usrpwd = generate_pwd(10)
+    dbname = f"db0{group}eq{team}"
+    usrrole = f"role0{group}eq{team}"
+    usrname = f"user0{group}eq{team}"
+    usrpwd = generate_pwd(16)
 
     # remove any previous execution data
     cursor.execute(f"DROP DATABASE IF EXISTS {dbname}")
@@ -78,7 +78,6 @@ if __name__ == "__main__":
             for j in range(1, TEAMS + 1):
                 credentials.append(create_db_and_user(i, j, cursor))
 
-        db.commit()
         save_to_file(credentials, OUTPUT_FILE)
         print("Credentials created successfully in PostgreSQL")
 
