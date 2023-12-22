@@ -26,3 +26,5 @@ Run script 🚀
 ```sh
 poetry run python src/main.py
 ```
+
+By default, generated credentials are available in `credentials.csv` file.
