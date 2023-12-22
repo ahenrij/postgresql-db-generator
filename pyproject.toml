@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "postgresql-db-generator"
+version = "0.1.0"
+description = "Generate multiple PostgreSQL databases and users with restricted privileges"
+authors = ["Henri Aïdasso <ahenrij@gmail.com>"]
+license = "LICENCE"
+readme = "README.md"
+packages = [{include = "postgresql_db_generator"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
