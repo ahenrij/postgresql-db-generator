@@ -1,5 +1,6 @@
 """Entry point."""
 import os
+import csv
 import string
 import secrets
 import psycopg2
@@ -33,11 +34,13 @@ def generate_pwd(length: int):
     return "".join(secrets.choice(alphabet) for _ in range(length))
 
 
-def save_to_file(lines, filepath):
-    """Save list of text into filepath."""
-    with open(filepath, mode="wt", encoding="utf-8") as f:
-        f.write("\n".join(str(line) for line in lines))
-        f.write("\n")
+def save_to_file(data: list[dict], filepath: str):
+    """Save list of dict into csv filepath."""
+    headers = data[0].keys()
+    with open(filepath, mode="w", newline="", encoding="utf-8") as f:
+        dict_writer = csv.DictWriter(f, headers)
+        dict_writer.writeheader()
+        dict_writer.writerows(data)
 
 
 def create_db_and_user(group: int, team: int):
@@ -46,17 +49,20 @@ def create_db_and_user(group: int, team: int):
     usrname = f"user{group}eq{team}"
     usrpwd = generate_pwd(10)
 
+    # remove any previous execution data
     cursor.execute(f"DROP DATABASE IF EXISTS {dbname}")
     cursor.execute(f"DROP USER IF EXISTS {usrname}")
     cursor.execute(f"DROP ROLE IF EXISTS {usrrole}")
 
+    # create database and associate user
     cursor.execute(f"CREATE DATABASE {dbname}")
     cursor.execute(f"CREATE ROLE {usrrole}")
     cursor.execute(f"REVOKE CONNECT ON DATABASE {dbname} FROM PUBLIC")
     cursor.execute(f"GRANT CONNECT ON DATABASE {dbname} TO {usrrole}")
     cursor.execute(f"CREATE USER {usrname} WITH PASSWORD '{usrpwd}'")
     cursor.execute(f"GRANT {usrrole} TO {usrname}")
-    return f"{usrname}  {usrpwd}    {dbname}"
+
+    return {"username": usrname, "password": usrpwd, "database": dbname}
 
 
 if __name__ == "__main__":
