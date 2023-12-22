@@ -21,6 +21,12 @@ Define .env variables
 cp .env.example .env
 ```
 
+For testing purpose, run local docker image. Omit this step as you need.
+
+```sh
+./scripts/start.sh
+```
+
 Run script 🚀
 
 ```sh
