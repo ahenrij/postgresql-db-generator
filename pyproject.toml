@@ -5,7 +5,7 @@ description = "Generate multiple PostgreSQL databases and users with restricted 
 authors = ["Henri Aïdasso <ahenrij@gmail.com>"]
 license = "LICENCE"
 readme = "README.md"
-packages = [{include = "postgresql_db_generator"}]
+packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
