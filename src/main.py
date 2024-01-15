@@ -4,6 +4,7 @@ import csv
 import string
 import secrets
 import psycopg2
+import pandas as pd
 from psycopg2 import Error
 from dotenv import load_dotenv
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
@@ -32,10 +33,12 @@ def save_to_file(data: list[dict], filepath: str):
 
 
 def create_db_and_user(group: int, team: int, cursor):
+    saved_credentials = pd.read_csv('credentials.csv')
+
     dbname = f"db0{group}eq{team}"
     usrrole = f"role0{group}eq{team}"
     usrname = f"user0{group}eq{team}"
-    usrpwd = generate_pwd(16)
+    usrpwd = saved_credentials[saved_credentials['username'] == usrname]['password'].values[0] # generate_pwd(16)
 
     # remove any previous execution data
     cursor.execute(f"DROP DATABASE IF EXISTS {dbname}")
@@ -82,7 +85,7 @@ if __name__ == "__main__":
         print("Credentials created successfully in PostgreSQL")
 
     except (Exception, Error) as error:
-        print("Error while connecting to PostgreSQL", error)
+        print("Error while connecting to PostgreSQL: ", error)
     finally:
         if db:
             cursor.close()
