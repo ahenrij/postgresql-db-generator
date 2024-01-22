@@ -72,7 +72,7 @@ if __name__ == "__main__":
         cursor = db.cursor()
 
         # remove connect privileges from existing databases
-        for dbname in ["repmgr", "postgres"]:
+        for dbname in ["repmgr", "postgres", "hvacstore"]:
             cursor.execute(f"REVOKE CONNECT ON DATABASE {dbname} FROM PUBLIC")
 
         # create user accounts and associated databases
